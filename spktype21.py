@@ -1,40 +1,48 @@
 # -*- coding: utf-8 -*-
-"""A supporting module for jplephem to handle data type 1 (Version 1.0.0)
+"""A supporting module for jplephem to handle data type 21 (Version 0.1.0)
 
 This module computes position and velocity of a celestial small body, from a 
-NASA SPICE SPK ephemeris kernel file of data type 1 (Modified Difference 
-Arrays).
+NASA SPICE SPK ephemeris kernel file of data type 21 (Extended Modified 
+Difference Arrays).
 http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/FORTRAN/req/spk.html
 
 You can get SPK files for many solar system small bodies from HORIZONS 
 system of NASA/JPL.  See https://ssd.jpl.nasa.gov/?horizons
 
-This module reads SPK files of data type 1, one of the types of binary SPK 
+This module reads SPK files of data type 21, one of the types of binary SPK 
 file.  
 
 At the point of Oct. 2018, HORIZONS system provides files of type 21 for 
-binary SPK files by default.  You can get type 1 binary SPK file for celestial 
-small bodies through TELNET interface by answering back '1' for 
-'SPK file format'.
+binary SPK files by default.  You can get type 21 binary SPK file for celestial 
+small bodies through TELNET interface by answering back 'Binary' for 
+'SPK file format'.  Also you can get type 21 binary SPK file from:
+https://ssd.jpl.nasa.gov/x/spk.html
 
-Module required:
+Modules required:
     jplephem (version 2.6 or later)
     numpy
 
 Usage:
     from spktype01 import SPKType01
     kernel = SPKType01.open('path')
-    position, velocity = kernel.compute_type01(center, target, jd)
+    position, velocity = kernel.compute_type21(center, target, jd)
     
     where:
         center - SPKID of central body (0 for SSB, 10 for Sun, etc.)
         target - SPKID of target body
         jd - time for computation (Julian date)
 
+Exceptions:
+    RuntimeError will be raised when:
+        invalid data_type of SPK file, or
+        SPK file contains too large table in EMDA record(s)
+    ValueError will be raised when:
+        invalid parameter(s) of compute_type21 function
+
 Author: Shushi Uetsuki (whiskie14142)
-This module has been developed based on jplephem.spk and FORTRAN source 
+This module has been developed based on jplephem and FORTRAN source 
 of the SPICE Toolkit of NASA/JPL/NAIF.
-jplephem : https://pypi.python.org/pypi/jplephem
+jplephem : https://pypi.org/project/jplephem/
 SPICE Toolkit : http://naif.jpl.nasa.gov/naif/toolkit.html
 """
 
@@ -62,7 +70,7 @@ class SPKType21(object):
         ssec = lambda s : s.start_second
         self.segments.sort(key=ssec)
         
-        # initialize arrays for spke01
+        # initialize arrays for spke21
         self.G = zeros(MAXTRM)
         
         self.REFPOS = zeros(3)
@@ -74,14 +82,10 @@ class SPKType21(object):
         self.WC = zeros(MAXTRM - 1)
         self.W = zeros(MAXTRM + 2)
         
-        # initialize for compute_type01
+        # initialize for compute_type21
         self.mda_record_exist = False
         self.current_segment_exist = False
         
-
-# Working here 2018/10/11
-
-
     @classmethod
     def open(cls, path):
         """Open the file at `path` and return an SPK instance.
@@ -102,10 +106,11 @@ class SPKType21(object):
     def comments(self):
         return self.daf.comments()
 
-    def compute_type01(self, center, target, jd1, jd2=0.0):
-        """Compute position and velocity of target from SPK data (data type 1).
+    def compute_type21(self, center, target, jd1, jd2=0.0):
+        """Compute position and velocity of target from SPK data (data type 21).
         Inputs:
-            center - SPKID of the central body (0 for SSB, 10 for Sun, etc)
+            center - SPKID of the central body (0 for Solar System Barycenter, 
+                     10 for Sun, etc)
             target - SPKID of the target
             jd1, jd2 - Julian date of epoch for computation.  (jd1 + jd2) will 
                 be used for computation.  If you want precise definition of 
@@ -121,27 +126,28 @@ class SPKType21(object):
         
         if self.mda_record_exist:
             if eval_sec >= self.mda_lb and eval_sec < self.mda_ub:
-                result = self.spke01(eval_sec, self.mda_record)
+                result = self.spke21(eval_sec, self.mda_record)
                 return result[0:3], result[3:]
         
         self.mda_record, self.mda_lb, self.mda_ub = self.get_MDA_record(eval_sec, target, center)
         self.mda_record_exists = True
         
-        result = self.spke01(eval_sec, self.mda_record)
+        result = self.spke21(eval_sec, self.mda_record)
         return result[0:3], result[3:]
                 
     def get_MDA_record(self, eval_sec, target, center):
-        """Return a MDA record for defined epoch.
+        """Return a EMDA record for defined epoch.
         Inputs:
             eval_sec - epoch for computation, seconds from J2000
             target - body ID of the target
             center - body ID of coordinate center
         Returns:
-            MDA record - a Numpy array of 71 floating point numbers
+            MDA record - a Numpy array of DLSIZE floating point numbers
         Exception:
             ValueError will be raised when:
                 eval_sed is outside of SPK data
                 target and center are not in SPK data
+            RuntimeError will be raised when:
                 invalid data type of SPK data
         """
         
@@ -176,17 +182,21 @@ class SPKType21(object):
         self.current_segment_exist = True
         
         # get the MDA record from selected segment
-        if self.current_segment.data_type != 1:
-            raise ValueError('Invalid data. Data Type must be 1.')
+        if self.current_segment.data_type != 21:
+            raise RuntimeError('Invalid data. Data Type must be 21')
         
         return self.current_segment.get_MDA_record(eval_sec)
         
-    def spke01(self, ET, RECORD):
+
+
+# left this module only 2018/10/12
+
+    def spke21(self, ET, RECORD):
         """Compute position and velocity from a Modified Difference Array record
         
         Inputs:
             ET: Epoch time to evaluate position and velocity (seconds since J2000)
-            RECORD: A record of Modified Difference Array
+            RECORD: A record of Extended Modified Difference Array
         Returns: STATE
             STATE: A numpy array which contains position and velocity
         """
@@ -463,6 +473,7 @@ class Segment(object):
          self.frame, self.data_type, self.start_i, self.end_i) = descriptor
         self.start_jd = jd(self.start_second)
         self.end_jd = jd(self.end_second)
+        self.DLSIZE = int(self.daf.map_array(self.end_i - 1, self.end_i - 1)
 
     def __str__(self):
         return self.describe(verbose=False)
@@ -499,8 +510,8 @@ class Segment(object):
         
         # serch target epoch in epoch directory to narrow serching aria
         if epoch_dir_count >= 1:
-            epoch_dir = self.daf.map_array(self.end_i - epoch_dir_count,
-                                            self.end_i - 1)
+            epoch_dir = self.daf.map_array(self.end_i - epoch_dir_count - 1,
+                                            self.end_i - 2)
             found = False
             for i in range(1, epoch_dir_count + 1):
                 if epoch_dir[i-1] > time_sec:
@@ -517,8 +528,8 @@ class Segment(object):
             serch_start_index = 1
 
         # epoch_table contains epochs for all records in this segment        
-        epoch_table = self.daf.map_array(self.start_i + (entry_count * 71),
-                                       self.start_i + (entry_count * 71) + entry_count - 1)
+        epoch_table = self.daf.map_array(self.start_i + (entry_count * self.DLSIZE),
+                                       self.start_i + (entry_count * self.DLSIZE) + entry_count - 1)
 
         # serch target epoch in epoch_table
         found = False
@@ -535,8 +546,8 @@ class Segment(object):
         else:
             lower_boundary = self.start_second
         
-        mda_record = self.daf.map_array(self.start_i + ((record_index - 1) * 71),
-                                        self.start_i + (record_index * 71) - 1)
+        mda_record = self.daf.map_array(self.start_i + ((record_index - 1) * self.DLSIZE),
+                                        self.start_i + (record_index * self.DLSIZE) - 1)
 
         # mda_record : one record of MDA
         # lower_boundary : lower boundary of epoch in this MDA record
