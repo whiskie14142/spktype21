@@ -373,7 +373,7 @@ class SPKType21(object):
 #C     of the difference table MAXDIM. 
 #C
 
-#        MAXDIM = int( RECORD[1-1])
+#        MAXDIM = int( RECORD[0])
         MAXDIM = self.current_segment.MAXDIM
 
         
@@ -408,20 +408,20 @@ class SPKType21(object):
 
 # from here, you should tweet indexes 2018/10/14
 
-        self.TL = RECORD[1]
-        self.G = RECORD[2:2+MAXDIM]
+        self.TL = RECORD[0]
+        self.G = RECORD[1:MAXDIM + 1]
 
 #C     
 #C     Collect the reference position and velocity.
 #C     
-        self.REFPOS[0] = RECORD[MAXDIM+2]
-        self.REFVEL[0] = RECORD[MAXDIM+3]
+        self.REFPOS[0] = RECORD[MAXDIM + 1]
+        self.REFVEL[0] = RECORD[MAXDIM + 2]
         
-        self.REFPOS[1] = RECORD[MAXDIM+4]
-        self.REFVEL[1] = RECORD[MAXDIM+5]
+        self.REFPOS[1] = RECORD[MAXDIM + 3]
+        self.REFVEL[1] = RECORD[MAXDIM + 4]
         
-        self.REFPOS[2] = RECORD[MAXDIM+6]
-        self.REFVEL[2] = RECORD[MAXDIM+7]
+        self.REFPOS[2] = RECORD[MAXDIM + 5]
+        self.REFVEL[2] = RECORD[MAXDIM + 6]
         
 #C
 #C     Initializing the difference table is one aspect of this routine
@@ -430,12 +430,13 @@ class SPKType21(object):
 #C     must transfer separately the portions of the table corresponding
 #C     to each component.
 #C
-        self.DT = reshape(RECORD[MAXDIM+8:MAXDIM*3+8], (MAXDIM, 3), order='F')
+        self.DT = reshape(RECORD[MAXDIM + 7:MAXDIM * 4 + 7], (MAXDIM, 3), 
+                          order='F')
         
-        self.KQMAX1 = int(RECORD[4*MAXDIM + 8])
-        self.KQ[0] = int(RECORD[4*MAXDIM + 9])
-        self.KQ[1] = int(RECORD[4*MAXDIM + 10])
-        self.KQ[2] = int(RECORD[4*MAXDIM + 11])
+        self.KQMAX1 = int(RECORD[4 * MAXDIM +  7])
+        self.KQ[0] =  int(RECORD[4 * MAXDIM +  8])
+        self.KQ[1] =  int(RECORD[4 * MAXDIM +  9])
+        self.KQ[2] =  int(RECORD[4 * MAXDIM + 10])
 #C     
 #C     Next we set up for the computation of the various differences
 #C     

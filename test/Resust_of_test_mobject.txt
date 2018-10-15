@@ -1,0 +1,59 @@
+Deactivating environment "C:\Users\shush_000\Anaconda3"...
+Activating environment "C:\Users\shush_000\Anaconda3"...
+
+[Anaconda3] C:\Users\shush_000\Documents\Python_Development\spktype21\test>python test_mobject.py
+
+File type DAF/SPK and format LTL-IEEE with 4 segments:
+2455197.50..2462502.50  Solar System Barycenter (0) -> Ceres (2000001) data_type=21
+2455197.50..2462502.50  Solar System Barycenter (0) -> Pallas (2000002) data_type=21
+2455197.50..2462502.50  Solar System Barycenter (0) -> Unknown Target (2000003) data_type=21
+2455197.50..2462502.50  Solar System Barycenter (0) -> Vesta (2000004) data_type=21
+
+Enter asteroid No.(1 - 4) or zero for exit ? 1
+
+Enter JD or 999 for break ? 2455200
+POS of Ceres:  [-2.45522706e+08 -3.07838124e+08 -9.51656191e+07]
+VEL of Ceres:  [ 13.29205563 -10.10482788  -7.46738363]
+
+Enter JD or 999 for break ? 2462500
+POS of Ceres:  [ 4.21919764e+08 -7.69963097e+07 -1.22172344e+08]
+VEL of Ceres:  [ 4.1696127  14.81958175  6.1446436 ]
+
+Enter JD or 999 for break ? 999
+Enter asteroid No.(1 - 4) or zero for exit ? 2
+
+Enter JD or 999 for break ? 2455200
+POS of Pallas:  [-3.45672648e+08 -1.36481299e+08  5.14000497e+07]
+VEL of Pallas:  [  3.56426118 -19.06376016   3.52260885]
+
+Enter JD or 999 for break ? 2462500
+POS of Pallas:  [ 2.54578222e+08 -4.35777368e+08  6.85444664e+07]
+VEL of Pallas:  [12.40191627  6.4817441  -2.1898218 ]
+
+Enter JD or 999 for break ? 999
+Enter asteroid No.(1 - 4) or zero for exit ? 3
+
+Enter JD or 999 for break ? 2455200
+POS of Juno:  [2.45318688e+08 1.74853107e+08 2.31309115e+07]
+VEL of Juno:  [-15.03442186  17.4448421    3.88109284]
+
+Enter JD or 999 for break ? 2462500
+POS of Juno:  [-1.88309220e+08 -4.56396334e+08 -7.83022914e+07]
+VEL of Juno:  [13.32086112 -4.37879343 -1.3673226 ]
+
+Enter JD or 999 for break ? 999
+Enter asteroid No.(1 - 4) or zero for exit ? 4
+
+Enter JD or 999 for break ? 2455200
+POS of Vesta:  [-2.68912749e+08  2.15865868e+08  1.21062193e+08]
+VEL of Vesta:  [-11.32713009 -14.35964004  -4.23903926]
+
+Enter JD or 999 for break ? 2462500
+POS of Vesta:  [ 3.23348072e+08 -9.80733120e+07 -8.14679082e+07]
+VEL of Vesta:  [ 8.40855235 16.90315809  5.63965507]
+
+Enter JD or 999 for break ? 999
+Enter asteroid No.(1 - 4) or zero for exit ? 0
+
+
+[Anaconda3] C:\Users\shush_000\Documents\Python_Development\spktype21\test>

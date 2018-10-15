@@ -86,7 +86,6 @@ class SPKType21(object):
         self.mda_record_exist = False
         self.current_segment_exist = False
         
-        
     @classmethod
     def open(cls, path):
         """Open the file at `path` and return an SPK instance.
@@ -374,16 +373,15 @@ class SPKType21(object):
 #C     of the difference table MAXDIM. 
 #C
 
-        MAXDIM = int( RECORD[1-1])
+#        MAXDIM = int( RECORD[0])
+        MAXDIM = self.current_segment.MAXDIM
 
-        mes = ('SPKE21 \nThe input record has a maximum table dimension ' +
-            'of {0}, while the maximum supported by this routine is {1}. ' +
-            'It is possible that this problem is due to your software ' +
-            'beeing out of date.').format(MAXDIM, MAXTRM)
-# debug        
-        print('Test output from spke21\n' + mes)
         
         if MAXDIM > MAXTRM:
+            mes = ('SPKE21 \nThe input record has a maximum table dimension ' +
+                'of {0}, while the maximum supported by this routine is {1}. ' +
+                'It is possible that this problem is due to your software ' +
+                'beeing out of date.').format(MAXDIM, MAXTRM)
             raise RuntimeError(mes)
             return STATE
         
@@ -403,20 +401,27 @@ class SPKType21(object):
 #C     For our purposes, NTE is always 3.
 #C
 
-        self.TL = RECORD[1]
-        self.G = RECORD[2:2+MAXDIM]
+
+
+
+
+
+# from here, you should tweet indexes 2018/10/14
+
+        self.TL = RECORD[0]
+        self.G = RECORD[1:MAXDIM + 1]
 
 #C     
 #C     Collect the reference position and velocity.
 #C     
-        self.REFPOS[0] = RECORD[MAXDIM+2]
-        self.REFVEL[0] = RECORD[MAXDIM+3]
+        self.REFPOS[0] = RECORD[MAXDIM + 1]
+        self.REFVEL[0] = RECORD[MAXDIM + 2]
         
-        self.REFPOS[1] = RECORD[MAXDIM+4]
-        self.REFVEL[1] = RECORD[MAXDIM+5]
+        self.REFPOS[1] = RECORD[MAXDIM + 3]
+        self.REFVEL[1] = RECORD[MAXDIM + 4]
         
-        self.REFPOS[2] = RECORD[MAXDIM+6]
-        self.REFVEL[2] = RECORD[MAXDIM+7]
+        self.REFPOS[2] = RECORD[MAXDIM + 5]
+        self.REFVEL[2] = RECORD[MAXDIM + 6]
         
 #C
 #C     Initializing the difference table is one aspect of this routine
@@ -425,12 +430,13 @@ class SPKType21(object):
 #C     must transfer separately the portions of the table corresponding
 #C     to each component.
 #C
-        self.DT = reshape(RECORD[MAXDIM+8:MAXDIM*3+8], (MAXDIM, 3), order='F')
+        self.DT = reshape(RECORD[MAXDIM + 7:MAXDIM * 4 + 7], (MAXDIM, 3), 
+                          order='F')
         
-        self.KQMAX1 = int(RECORD[4*MAXDIM + 8])
-        self.KQ[0] = int(RECORD[4*MAXDIM + 9])
-        self.KQ[1] = int(RECORD[4*MAXDIM + 10])
-        self.KQ[2] = int(RECORD[4*MAXDIM + 11])
+        self.KQMAX1 = int(RECORD[4 * MAXDIM +  7])
+        self.KQ[0] =  int(RECORD[4 * MAXDIM +  8])
+        self.KQ[1] =  int(RECORD[4 * MAXDIM +  9])
+        self.KQ[2] =  int(RECORD[4 * MAXDIM + 10])
 #C     
 #C     Next we set up for the computation of the various differences
 #C     
@@ -555,26 +561,10 @@ class Segment(object):
          self.frame, self.data_type, self.start_i, self.end_i) = descriptor
         self.start_jd = jd(self.start_second)
         self.end_jd = jd(self.end_second)
-#DEBUG        
-        finflag = False
-        i = -1
-        while True:
-            i  += 1
-            k = self.start_i + i * 10
-            kend = k + 9
-            if kend >= self.end_i:
-                print(k,self.daf.map_array(k, self.end_i))
-                finflag = True
-            else:
-                print(k, self.daf.map_array(k, kend))
-            if finflag: break
         
-#TEST
-        dlsize = int(self.daf.map_array(self.end_i - 1, self.end_i - 1))
-        self.DLSIZE = 4 * dlsize + 1
-#DEBUG
-        print('dlsize=',dlsize)
-        print('DLSIZE=',self.DLSIZE)
+        # Based on SPK data file
+        self.MAXDIM = int(self.daf.map_array(self.end_i - 1, self.end_i - 1))
+        self.DLSIZE = 4 * self.MAXDIM + 11
 
     def __str__(self):
         return self.describe(verbose=False)
@@ -605,8 +595,6 @@ class Segment(object):
 
         # Number of records in this segment
         entry_count = int(self.daf.map_array(self.end_i, self.end_i))
-#DEBUG
-        print('entry_count=',entry_count)
         
         # Number of entries in epoch directory 
         epoch_dir_count = entry_count // 100
