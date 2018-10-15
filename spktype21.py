@@ -23,11 +23,12 @@ Modules required:
     numpy
 
 Usage:
-    from spktype01 import SPKType01
-    kernel = SPKType01.open('path')
+    from spktype21 import SPKType21
+    kernel = SPKType21.open('path')
     position, velocity = kernel.compute_type21(center, target, jd)
     
     where:
+        path - path to the SPK file
         center - SPKID of central body (0 for SSB, 10 for Sun, etc.)
         target - SPKID of target body
         jd - time for computation (Julian date)
@@ -62,7 +63,7 @@ def jd(seconds):
     return T0 + seconds / S_PER_DAY
 
 class SPKType21(object):
-    """Class for SPK kernel to handle data type 1 (Modified Difference Arrays)
+    """Class for SPK kernel to handle data type 21 (Extended Modified Difference Arrays)
     """
     def __init__(self, daf):
         self.daf = daf
@@ -109,7 +110,7 @@ class SPKType21(object):
     def compute_type21(self, center, target, jd1, jd2=0.0):
         """Compute position and velocity of target from SPK data (data type 21).
         Inputs:
-            center - SPKID of the central body (0 for Solar System Barycenter, 
+            center - SPKID of the coordinate center (0 for Solar System Barycenter, 
                      10 for Sun, etc)
             target - SPKID of the target
             jd1, jd2 - Julian date of epoch for computation.  (jd1 + jd2) will 
@@ -142,7 +143,7 @@ class SPKType21(object):
             target - body ID of the target
             center - body ID of coordinate center
         Returns:
-            MDA record - a Numpy array of DLSIZE floating point numbers
+            EMDA record - a Numpy array of DLSIZE floating point numbers
         Exception:
             ValueError will be raised when:
                 eval_sed is outside of SPK data
@@ -201,16 +202,16 @@ class SPKType21(object):
             STATE: A numpy array which contains position and velocity
         """
         
-        # This method has been translated from spke21.f of SPICE Toolkit and
-        # modified by Shushi Uetsuki.
-        #
-        # SPICE Toolkit for FORTRAN : http://naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
-        # SPK Required Reading : http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/spk.html
-        #
-        # Original FORTRAN code uses 'SAVE' directive, and it means all variable
-        # should be saved for next call.  So i decided to make almost all 
-        # variables to be instance variable.  Some of them are initialized in 
-        # __init__ method.
+# This method was translated from FORTRAN source code ‘spke21.f’ of SPICE 
+# Toolkit and modified by Shushi Uetsuki.
+# 
+# SPICE Toolkit for FORTRAN : http://naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
+# SPK Required Reading : http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/spk.html
+# 
+# Unfortunately, I found some discrepancies between FORTRAN source code 
+# and actual data contained in SPK files.  So, I tried to compose a 
+# method that compute positions and velocities correctly by referencing 
+# code of spktype01.
 
 # Following comments start with #C were copied from original FORTRAN code.
 
@@ -373,7 +374,9 @@ class SPKType21(object):
 #C     of the difference table MAXDIM. 
 #C
 
-#        MAXDIM = int( RECORD[0])
+# The FORTRAN source code indicates that RECORD[0] contains MAXDIM, but actual 
+# data record does not contain it. MAXDIM is contained in each segment.
+
         MAXDIM = self.current_segment.MAXDIM
 
         
@@ -401,12 +404,9 @@ class SPKType21(object):
 #C     For our purposes, NTE is always 3.
 #C
 
-
-
-
-
-
-# from here, you should tweet indexes 2018/10/14
+# The FORTRAN source code indicates that RECORD[1] contains TL,  but on the 
+# actual data RECORD[0] contains it, and all addresses for following data are 
+# shifted forward by one.
 
         self.TL = RECORD[0]
         self.G = RECORD[1:MAXDIM + 1]
@@ -562,7 +562,9 @@ class Segment(object):
         self.start_jd = jd(self.start_second)
         self.end_jd = jd(self.end_second)
         
-        # Based on SPK data file
+# 'SPK Required Reading' indicates that the penultimate element of the segment 
+# is the difference line size (DLSIZE), but actual data contains there a MAXDIM.
+        
         self.MAXDIM = int(self.daf.map_array(self.end_i - 1, self.end_i - 1))
         self.DLSIZE = 4 * self.MAXDIM + 11
 

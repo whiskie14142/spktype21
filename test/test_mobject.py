@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Compare results of spktype01 and spktype21.
+"""Multi-object SPK file test for spktype21.
+CPJV.bsp contains spk data for four asteroids.
+
 @author: Shushi Uetsuki (whiskie14142)
 """
 

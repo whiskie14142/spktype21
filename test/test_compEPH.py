@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Test Program for spktype01.
+"""Test Program for spktype21.
+'Ryugu-21.bsp' is a SPK file for asteroid RYUGU from 2000-Jan-01 to 
+2100-Jan-01, with data type 21.
+'RyuguEPH.csv' is ephemeris created by HORIZONS system for the same
+object and the same period.  The interval is 100 days.
 
+This program computes difference between ephemeris and output of
+spktype21.
 
 @author: Shushi Uetsuki (whiskie14142)
 """
