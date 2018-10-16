@@ -23,7 +23,7 @@ print(k21)
 print()
 
 while(True):
-    jd = float(input('JD? if end, enter 999 '))
+    jd = float(input('Enter JD, or 999 to exit >> '))
     if jd == 999.0:
         break
     else:

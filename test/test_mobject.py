@@ -19,11 +19,11 @@ print(k21)
 print()
 
 while(True):
-    asteroid = int(input('Enter asteroid No.(1 - 4) or zero for exit ? '))
+    asteroid = int(input('Enter asteroid No. (1 - 4), or zero to exit >> '))
     print()
     if (asteroid < 1) or (asteroid > 4): break
     while(True):
-        jd = float(input('Enter JD or 999 for break ? '))
+        jd = float(input('Enter JD, or 999 to break >> '))
         if jd <1000.0 : break
         pos21, vel21 = k21.compute_type21(0, spkid[asteroid], jd)
         print('POS of ' + oname[asteroid] + ': ', pos21)
