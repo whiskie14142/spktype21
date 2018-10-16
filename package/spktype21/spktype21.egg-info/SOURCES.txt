@@ -1,0 +1,7 @@
+README.md
+setup.py
+spktype21.py
+spktype21.egg-info/PKG-INFO
+spktype21.egg-info/SOURCES.txt
+spktype21.egg-info/dependency_links.txt
+spktype21.egg-info/top_level.txt
